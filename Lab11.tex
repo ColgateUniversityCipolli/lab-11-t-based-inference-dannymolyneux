@@ -208,7 +208,7 @@ farther & -0.60 & -0.03 & -0.19 & -0.20 & 0.13 \\
   \hlkwd{geom_density}\hldef{(}\hlkwc{color} \hldef{=} \hlsng{"blue"}\hldef{)} \hlopt{+}
   \hlkwd{xlab}\hldef{(}\hlsng{"Difference between changes in dopamine"}\hldef{)}\hlopt{+}
   \hlkwd{ylab}\hldef{(}\hlsng{"Density"}\hldef{)}\hlopt{+}
-  \hlkwd{labs}\hldef{(}\hlkwc{title} \hldef{=} \hlsng{"Difference in dopamine levels when further away vs closer"}\hldef{)} \hlopt{+}
+  \hlkwd{labs}\hldef{(}\hlkwc{title} \hldef{=} \hlsng{"Difference in dopamine levels when further away vs. closer"}\hldef{)} \hlopt{+}
   \hlkwd{theme}\hldef{(}\hlkwc{plot.title} \hldef{=} \hlkwd{element_text}\hldef{(}\hlkwc{size} \hldef{=} \hlnum{11}\hldef{))}
 \hldef{(farther.plot} \hlopt{+} \hldef{closer.plot)} \hlopt{/} \hldef{differences.plot}
 \end{alltt}
@@ -233,8 +233,47 @@ like: ($t=23.99$, $p<0.0001$; $g=1.34$; 95\% CI: 4.43, 4.60).\\
 correction of their $p$-values. I'm waiting to hear back from them via email!
 \begin{enumerate}
   \item ``The close responses differed significantly from 0 ($p=1.63 \times 10^{-8}$).''
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlkwd{library}\hldef{(effectsize)}
+\hldef{closer.t.test} \hlkwb{=} \hlkwd{t.test}\hldef{(}\hlkwc{x}\hldef{=dopamine.data}\hlopt{$}\hldef{`Closer_vals`,}
+                       \hlkwc{alternative} \hldef{=} \hlsng{"two.sided"}\hldef{,}
+                       \hlkwc{mu} \hldef{=} \hlnum{0}\hldef{,}
+                       \hlkwc{conf.level} \hldef{=} \hlnum{0.95}\hldef{)}
+\hldef{g} \hlkwb{=} \hlkwd{hedges_g}\hldef{(}\hlkwc{x} \hldef{= dopamine.data}\hlopt{$}\hldef{`Closer_vals`,} \hlkwc{mu} \hldef{=} \hlnum{0}\hldef{,} \hlkwc{alternative} \hldef{=} \hlsng{"two.sided"}\hldef{)}
+\end{alltt}
+\end{kframe}
+\end{knitrout}
+t = 8.3024, p < 0.00000002, g = 1.61, 95\% CI: 0.1173875, 0.1950586 
   \item ``The far responses differed significantly from 0 ($p=5.17 \times 10^{-8}$).''
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hldef{farther.t.test} \hlkwb{=} \hlkwd{t.test}\hldef{(}\hlkwc{x}\hldef{=dopamine.data}\hlopt{$}\hldef{`Farther_vals`,}
+                       \hlkwc{alternative} \hldef{=} \hlsng{"two.sided"}\hldef{,}
+                       \hlkwc{mu} \hldef{=} \hlnum{0}\hldef{,}
+                       \hlkwc{conf.level} \hldef{=} \hlnum{0.95}\hldef{)}
+\hldef{g} \hlkwb{=} \hlkwd{hedges_g}\hldef{(}\hlkwc{x} \hldef{= dopamine.data}\hlopt{$}\hldef{`Farther_vals`,} \hlkwc{mu} \hldef{=} \hlnum{0}\hldef{,} \hlkwc{alternative} \hldef{=} \hlsng{"two.sided"}\hldef{)}
+\end{alltt}
+\end{kframe}
+\end{knitrout}
+t = -7.778, p < 0.00000006, g = -1.51, 95\% CI: -0.2565176, -0.1489313 
   \item ``The difference between populations was significant ($p=1.04 \times10^{-8}$).''
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hldef{differences.t.test} \hlkwb{=} \hlkwd{t.test}\hldef{(}\hlkwc{x}\hldef{=dopamine.data}\hlopt{$}\hldef{`difference`,}
+                       \hlkwc{alternative} \hldef{=} \hlsng{"two.sided"}\hldef{,}
+                       \hlkwc{mu} \hldef{=} \hlnum{0}\hldef{,}
+                       \hlkwc{conf.level} \hldef{=} \hlnum{0.95}\hldef{)}
+\hldef{g} \hlkwb{=} \hlkwd{hedges_g}\hldef{(}\hlkwc{x} \hldef{= dopamine.data}\hlopt{$}\hldef{`difference`,} \hlkwc{mu} \hldef{=} \hlnum{0}\hldef{,} \hlkwc{alternative} \hldef{=} \hlsng{"two.sided"}\hldef{)}
+\end{alltt}
+\end{kframe}
+\end{knitrout}
+t = 8.5109, p < 0.00000002, g = 1.65, 95\% CI: 0.2719028, 0.4459921
+
+
 \end{enumerate}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % CONDUCT THE TESTS

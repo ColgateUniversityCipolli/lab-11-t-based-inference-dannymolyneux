@@ -69,3 +69,25 @@ differences.plot = ggplot(data = dopamine.data, aes(x=difference))+
   labs(color = "", title = "Difference in dopamine levels for young zebra finches further away vs closer") +
   theme(plot.title = element_text(size = 9))
 (farther.plot + closer.plot) / differences.plot
+
+#Task 4: Conduct the tests
+
+#part a
+install.packages("effectsize")
+library(effectsize)
+closer.t.test = t.test(x=dopamine.data$`Closer_vals`,
+                       alternative = "two.sided", mu = 0, conf.level = 0.95)
+closer.t.test
+g = hedges_g(x = dopamine.data$`Closer_vals`, mu = 0, alternative = "two.sided")
+
+#part b
+farther.t.test = t.test(x=dopamine.data$`Farther_vals`,
+                       alternative = "two.sided", mu = 0, conf.level = 0.95)
+farther.t.test
+g = hedges_g(x = dopamine.data$`Farther_vals`, mu = 0, alternative = "two.sided")
+
+#part c
+differences.t.test = t.test(x=dopamine.data$`difference`,
+                       alternative = "two.sided", mu = 0, conf.level = 0.95)
+differences.t.test
+g = hedges_g(x = dopamine.data$`difference`, mu = 0, alternative = "two.sided")
