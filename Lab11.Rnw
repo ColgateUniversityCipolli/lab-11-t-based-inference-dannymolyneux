@@ -41,6 +41,15 @@ conduct a power analysis. How many observations would the researchers
 need to detect a moderate-to-large effect ($d=0.65$) when using 
 $\alpha=0.05$ and default power (0.80) for a two-sided one sample 
 $t$ test.
+<<message=F, warning=F>>=
+library(pwr)
+power.analysis = pwr.t.test(d=0.65, 
+                            sig.level = 0.05,
+                            power = 0.80, 
+                            type = "one.sample", 
+                            alternative = "two.sided")
+@
+I got that n = 20.58039, so 21 observations are required in order to detect a moderate-to-large effect when using this significance level and power.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % COLLECT DATA
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -50,6 +59,14 @@ do to collect the data for Figure 2(g). Note that you only need the
 \texttt{closer\_vals} and \texttt{further\_vals}. Ensure to 
 \texttt{mutate()} the data to get a difference 
 (e.g., \texttt{closer\_vals - further\_vals}).
+<<message=F, warning=F>>=
+library(tidyverse)
+dopamine.data = read_csv("DopamineData.csv")
+dopamine.data = dopamine.data |>
+  #create column that contains the difference between farther and closer values
+  mutate(difference = Closer_vals - Farther_vals)
+@
+To collect the data for Figure 2(g), I had to first download the entire source data file for all of Figure 2. Then, I extracted the data from the Farther\textunderscore vals and Closer\textunderscore vals tabs which correspond to Figure 2(g). Lastly, I put the columns side-by-side into a new Excel file, and downloaded it as a .csv file.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % SUMMARIZE DATA
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -65,6 +82,82 @@ do to collect the data for Figure 2(g). Note that you only need the
   that there is a difference between dopamine in the brains of
   young zebra finches when they sing further away compared to 
   closer to their adult song?
+  
+\begin{table}[H]
+\centering
+\begin{tabular}{rrrrrr} 
+  \hline
+ & min & max & median & mean & sd \\
+  \hline
+farther & -0.60 & -0.03 & -0.19 & -0.20 & 0.13 \\
+  closer & 0.00 & 0.34 & 0.15 & 0.16 & 0.09 \\
+  differences & 0.04 & 0.93 & 0.33 & 0.36 & 0.21 \\
+    \hline
+\end{tabular}
+\caption{Numerical Summary for the further, closer, and differences data}
+\label{table:reference}
+\end{table}
+<<message=F, warning=F>>=
+library(patchwork)
+summary = function(data) {
+  mean = mean(data)
+  min = min(data)
+  max = max(data)
+  sd = sd(data)
+  median = median(data)
+  return(c(min, max, median, mean, sd))
+}
+farther = summary(dopamine.data$`Farther_vals`)
+closer = summary(dopamine.data$`Closer_vals`)
+differences = summary(dopamine.data$difference)
+
+table = data.frame()
+table = rbind(farther,
+              closer,
+              differences) |> as.data.frame()
+summary.table = table |>
+  rename(min = "V1",
+         max = "V2",
+         median = "V3",
+         mean = "V4",
+         sd = "V5")
+
+farther.plot = ggplot(data = dopamine.data, aes(x=`Farther_vals`))+         
+  geom_histogram(aes(y=after_stat(density)),
+                 breaks=seq(-0.7,0,0.07)) +
+  geom_hline(yintercept=0)+                      
+  theme_bw()+                                     
+  geom_density(color = "blue") +
+  xlab("Change in dopamine")+                 
+  ylab("Density")+             
+  labs(color = "", title = "Change in dopamine levels when further away") +
+  theme(plot.title = element_text(size = 10))
+closer.plot = ggplot(data = dopamine.data, aes(x=`Closer_vals`))+         
+  geom_histogram(aes(y=after_stat(density)),
+                 breaks=seq(0,0.35,0.035)) +
+  geom_hline(yintercept=0)+                      
+  theme_bw()+                                     
+  geom_density(color = "blue") +
+  xlab("Change in dopamine")+                 
+  ylab("Density")+             
+  labs(color = "", title = "Change in dopamine levels when closer") +
+  theme(plot.title = element_text(size = 10))
+differences.plot = ggplot(data = dopamine.data, aes(x=difference))+         
+  geom_histogram(aes(y=after_stat(density)),
+                 breaks=seq(0,1,0.08)) +
+  geom_hline(yintercept=0)+                      
+  theme_bw()+                                     
+  geom_density(color = "blue") +
+  xlab("Difference between changes in dopamine")+                 
+  ylab("Density")+             
+  labs(title = "Difference in dopamine levels when further away vs. closer") +
+  theme(plot.title = element_text(size = 11))
+(farther.plot + closer.plot) / differences.plot
+@
+The data does suggest that dopamine levels decrease when young zebra finches sing further away from their adult song. Although some of the data is close to 0, every data point is negative, indicating dopamine decreased for every observation. We can say the opposite thing about young zebra finches when they sing closer to their adult song. Every observation is positive, meaning even if not always by much, they all increased in dopamine levels when singing close to their adult song.
+
+When looking at the differences between the two sets of data, you can see there is quite a significant difference between changes in dopamine levels for the zebra finches, depending on whether they are closer or further away from their adult song. When doing closer - further, every observation is positive, meaning dopamine levels always change more positively when closer, than they do when further from their adult song. \\
+Note that the plots don't follow a normal distribution very well, mainly due to the fact that we only have 25 observations for each data set.
   \item \textbf{Optional Challenge:} Can you reproduce Figure 2(g)?
   Note that the you can use \texttt{geom\_errorbar()} to plot
   the range created by adding the mean $\pm$ one standard deviation.
