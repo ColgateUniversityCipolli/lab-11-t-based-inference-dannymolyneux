@@ -91,3 +91,56 @@ differences.t.test = t.test(x=dopamine.data$`difference`,
                        alternative = "two.sided", mu = 0, conf.level = 0.95)
 differences.t.test
 g = hedges_g(x = dopamine.data$`difference`, mu = 0, alternative = "two.sided")
+
+
+#Task 5: Plotting
+
+#Part a
+null.dat1 = tibble(t=seq(-5, 5, length.out = 1000)) |>
+  mutate(density.null = dt(t, df=24))
+null.plot = ggplot() +
+  # null distribution
+  geom_line(data=null.dat1, 
+            aes(x=t, y=density.null))+
+  geom_hline(yintercept=0)+
+  # rejection regions
+  geom_ribbon(data=subset(null.dat1, t<=qt(0.025, df=24)), 
+              aes(x=t, ymin=0, ymax=density.null),
+              fill="red", alpha=0.5)+
+  geom_ribbon(data=subset(null.dat1, t>=qt(0.975, df=24)), 
+              aes(x=t, ymin=0, ymax=density.null),
+              fill="red", alpha=0.5)
+
+#Part b
+null.dat2 = tibble(t=seq(-5, 5, length.out = 1000)) |>
+  mutate(density.null = dt(t, df=24))
+null.plot = ggplot() +
+  # null distribution
+  geom_line(data=null.dat2, 
+            aes(x=t, y=density.null))+
+  geom_hline(yintercept=0)+
+  # rejection regions
+  geom_ribbon(data=subset(null.dat2, t<=qt(0.025, df=24)), 
+              aes(x=t, ymin=0, ymax=density.null),
+              fill="red", alpha=0.5)+
+  geom_ribbon(data=subset(null.dat2, t>=qt(0.975, df=24)), 
+              aes(x=t, ymin=0, ymax=density.null),
+              fill="red", alpha=0.5)
+
+#Part c
+null.dat3 = tibble(t=seq(-5, 5, length.out = 1000)) |>
+  mutate(density.null = dt(t, df=24))
+null.plot = ggplot() +
+  # null distribution
+  geom_line(data=null.dat3, 
+            aes(x=t, y=density.null))+
+  geom_hline(yintercept=0)+
+  # rejection regions
+  geom_ribbon(data=subset(null.dat3, t<=qt(0.025, df=24)), 
+              aes(x=t, ymin=0, ymax=density.null),
+              fill="red", alpha=0.5)+
+  geom_ribbon(data=subset(null.dat3, t>=qt(0.975, df=24)), 
+              aes(x=t, ymin=0, ymax=density.null),
+              fill="red", alpha=0.5)
+
+
