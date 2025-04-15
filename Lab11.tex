@@ -282,8 +282,161 @@ For all three of these results, it is clear that there is statistically discerni
 hypothesis testing plots for each part of the previous question.
 \begin{enumerate}
   \item Question 4, part(a).
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hldef{R} \hlkwb{=} \hlnum{1000} \hlcom{#number of resamples}
+\hldef{mu0} \hlkwb{=} \hlnum{0} \hlcom{#hypothesized mean}
+\hldef{close.vec} \hlkwb{=} \hldef{dopamine.data}\hlopt{$}\hldef{Closer_vals} \hlcom{#vector for closer values}
+\hldef{far.vec} \hlkwb{=} \hldef{dopamine.data}\hlopt{$}\hldef{Farther_vals} \hlcom{#vector for farther values}
+\hldef{diff.vec} \hlkwb{=} \hldef{dopamine.data}\hlopt{$}\hldef{difference} \hlcom{#vector for difference}
+\hldef{n} \hlkwb{=} \hlkwd{length}\hldef{(close.vec)} \hlcom{#sample size}
+\hldef{resamples} \hlkwb{=} \hlkwd{tibble}\hldef{(}\hlkwc{close} \hldef{=} \hlkwd{numeric}\hldef{(R),}
+                   \hlkwc{far} \hldef{=} \hlkwd{numeric}\hldef{(R),}
+                   \hlkwc{difference} \hldef{=} \hlkwd{numeric}\hldef{(R))}
+\hlkwa{for}\hldef{(i} \hlkwa{in} \hlnum{1}\hlopt{:}\hldef{R)\{}
+  \hlcom{#resampling close responses}
+  \hldef{close.sample} \hlkwb{<-} \hlkwd{sample}\hldef{(}\hlkwc{x}\hldef{=close.vec,}
+                        \hlkwc{size}\hldef{=n,}
+                        \hlkwc{replace}\hldef{=T)}
+  \hlcom{#resampling far responses}
+  \hldef{far.sample} \hlkwb{<-} \hlkwd{sample}\hldef{(}\hlkwc{x}\hldef{=far.vec,}
+                         \hlkwc{size}\hldef{=n,}
+                         \hlkwc{replace}\hldef{=T)}
+  \hlcom{#resampling difference}
+  \hldef{difference.sample} \hlkwb{<-} \hlkwd{sample}\hldef{(}\hlkwc{x}\hldef{=diff.vec,}
+                         \hlkwc{size}\hldef{=n,}
+                         \hlkwc{replace}\hldef{=T)}
+  \hlcom{#resampled t statistic for close values}
+  \hldef{resamples}\hlopt{$}\hldef{close[i]} \hlkwb{=} \hldef{(}\hlkwd{mean}\hldef{(close.sample)}\hlopt{-}\hldef{mu0)}\hlopt{/}\hldef{(}\hlkwd{sd}\hldef{(close.sample)}\hlopt{/}\hlkwd{sqrt}\hldef{(n))}
+  \hlcom{#resampled t statistic for far values}
+  \hldef{resamples}\hlopt{$}\hldef{far[i]} \hlkwb{=} \hldef{(}\hlkwd{mean}\hldef{(far.sample)}\hlopt{-}\hldef{mu0)}\hlopt{/}\hldef{(}\hlkwd{sd}\hldef{(far.sample)}\hlopt{/}\hlkwd{sqrt}\hldef{(n))}
+  \hlcom{#resampled t statistic for differences}
+  \hldef{resamples}\hlopt{$}\hldef{difference[i]} \hlkwb{=} \hldef{(}\hlkwd{mean}\hldef{(difference.sample)}\hlopt{-}\hldef{mu0)}\hlopt{/}\hldef{(}\hlkwd{sd}\hldef{(difference.sample)}\hlopt{/}\hlkwd{sqrt}\hldef{(n))}
+\hldef{\}}
+
+\hlcom{#data for null T disribution}
+\hldef{null.dat} \hlkwb{=} \hlkwd{tibble}\hldef{(}\hlkwc{t}\hldef{=}\hlkwd{seq}\hldef{(}\hlopt{-}\hlnum{5}\hldef{,} \hlnum{5}\hldef{,} \hlkwc{length.out} \hldef{=} \hlnum{1000}\hldef{)) |>}
+  \hlkwd{mutate}\hldef{(}\hlkwc{density.null} \hldef{=} \hlkwd{dt}\hldef{(t,} \hlkwc{df}\hldef{=}\hlnum{24}\hldef{))}
+
+\hlcom{#Part a}
+
+\hldef{close.t.stat} \hlkwb{=} \hldef{(}\hlkwd{mean}\hldef{(close.vec)} \hlopt{-} \hldef{mu0)}\hlopt{/}\hldef{(}\hlkwd{sd}\hldef{(close.vec)}\hlopt{/}\hlkwd{sqrt}\hldef{(n))} \hlcom{#close t statistic}
+\hlcom{#data for plotting observed point}
+\hldef{close.obs} \hlkwb{=} \hlkwd{tibble}\hldef{(}\hlkwc{t} \hldef{= close.t.stat,}
+             \hlkwc{y} \hldef{=} \hlnum{0}\hldef{)}
+\hlcom{#plot for close values}
+\hldef{close.plot} \hlkwb{=} \hlkwd{ggplot}\hldef{()} \hlopt{+}
+  \hlcom{# null distribution}
+  \hlkwd{geom_line}\hldef{(}\hlkwc{data}\hldef{=null.dat,}
+            \hlkwd{aes}\hldef{(}\hlkwc{x}\hldef{=t,} \hlkwc{y}\hldef{=density.null))}\hlopt{+}
+  \hlkwd{geom_hline}\hldef{(}\hlkwc{yintercept}\hldef{=}\hlnum{0}\hldef{)}\hlopt{+}
+  \hlcom{# rejection region}
+  \hlkwd{geom_ribbon}\hldef{(}\hlkwc{data}\hldef{=}\hlkwd{subset}\hldef{(null.dat, t}\hlopt{>=}\hlkwd{qt}\hldef{(}\hlnum{0.95}\hldef{,} \hlkwc{df}\hldef{=n}\hlopt{-}\hlnum{1}\hldef{)),}
+              \hlkwd{aes}\hldef{(}\hlkwc{x}\hldef{=t,} \hlkwc{ymin}\hldef{=}\hlnum{0}\hldef{,} \hlkwc{ymax}\hldef{=density.null),}
+              \hlkwc{fill}\hldef{=}\hlsng{"red"}\hldef{,} \hlkwc{alpha}\hldef{=}\hlnum{0.5}\hldef{)} \hlopt{+}
+  \hlcom{#p-value region}
+  \hlkwd{geom_ribbon}\hldef{(}\hlkwc{data}\hldef{=}\hlkwd{subset}\hldef{(null.dat, t}\hlopt{>=}\hldef{close.t.stat),}
+              \hlkwd{aes}\hldef{(}\hlkwc{x}\hldef{=t,} \hlkwc{ymin}\hldef{=}\hlnum{0}\hldef{,} \hlkwc{ymax}\hldef{=density.null),}
+              \hlkwc{fill}\hldef{=}\hlsng{"blue"}\hldef{,} \hlkwc{alpha}\hldef{=}\hlnum{0.5}\hldef{)} \hlopt{+}
+  \hlcom{#observation point (t statistic)}
+  \hlkwd{geom_point}\hldef{(}\hlkwc{data}\hldef{=close.obs,} \hlkwd{aes}\hldef{(}\hlkwc{x}\hldef{=t,} \hlkwc{y}\hldef{=y),} \hlkwc{color}\hldef{=}\hlsng{"red"}\hldef{)}\hlopt{+}
+  \hlcom{#Resampling Distribution}
+  \hlkwd{stat_density}\hldef{(}\hlkwc{data}\hldef{=resamples,}
+               \hlkwd{aes}\hldef{(}\hlkwc{x}\hldef{=close),}
+               \hlkwc{geom}\hldef{=}\hlsng{"line"}\hldef{,} \hlkwc{color}\hldef{=}\hlsng{"grey"}\hldef{)}\hlopt{+}
+  \hlcom{#clean up aesthetics}
+  \hlkwd{theme_bw}\hldef{()}\hlopt{+}
+  \hlkwd{ylab}\hldef{(}\hlsng{"Density"}\hldef{)}\hlopt{+}
+  \hlkwd{ggtitle}\hldef{(}\hlsng{"T-Test for Close Responses of the Young Zebra Finches"}\hldef{,}
+          \hlkwc{subtitle}\hldef{=}\hlkwd{bquote}\hldef{(H[}\hlnum{0}\hldef{]}\hlopt{==}\hlnum{0}\hlopt{*}\hlsng{";"}\hlopt{~}\hldef{H[a]}\hlopt{>=}\hlnum{0}\hldef{))}
+\hldef{close.plot}
+\end{alltt}
+\end{kframe}
+\includegraphics[width=\maxwidth]{figure/unnamed-chunk-8-1} 
+\end{knitrout}
   \item Question 4, part(b).
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hldef{far.t.stat} \hlkwb{=} \hldef{(}\hlkwd{mean}\hldef{(far.vec)} \hlopt{-} \hldef{mu0)}\hlopt{/}\hldef{(}\hlkwd{sd}\hldef{(far.vec)}\hlopt{/}\hlkwd{sqrt}\hldef{(n))} \hlcom{#far t statistic}
+\hlcom{#data for plotting observed point}
+\hldef{far.obs} \hlkwb{=} \hlkwd{tibble}\hldef{(}\hlkwc{t} \hldef{= far.t.stat,}
+                   \hlkwc{y} \hldef{=} \hlnum{0}\hldef{)}
+\hlcom{#plot for far values}
+\hldef{far.plot} \hlkwb{=} \hlkwd{ggplot}\hldef{()} \hlopt{+}
+  \hlcom{# null distribution}
+  \hlkwd{geom_line}\hldef{(}\hlkwc{data}\hldef{=null.dat,}
+            \hlkwd{aes}\hldef{(}\hlkwc{x}\hldef{=t,} \hlkwc{y}\hldef{=density.null))}\hlopt{+}
+  \hlkwd{geom_hline}\hldef{(}\hlkwc{yintercept}\hldef{=}\hlnum{0}\hldef{)}\hlopt{+}
+  \hlcom{# rejection region}
+  \hlkwd{geom_ribbon}\hldef{(}\hlkwc{data}\hldef{=}\hlkwd{subset}\hldef{(null.dat, t}\hlopt{<=}\hlkwd{qt}\hldef{(}\hlnum{0.05}\hldef{,} \hlkwc{df}\hldef{=n}\hlopt{-}\hlnum{1}\hldef{)),}
+              \hlkwd{aes}\hldef{(}\hlkwc{x}\hldef{=t,} \hlkwc{ymin}\hldef{=}\hlnum{0}\hldef{,} \hlkwc{ymax}\hldef{=density.null),}
+              \hlkwc{fill}\hldef{=}\hlsng{"red"}\hldef{,} \hlkwc{alpha}\hldef{=}\hlnum{0.5}\hldef{)} \hlopt{+}
+  \hlcom{#p-value region}
+  \hlkwd{geom_ribbon}\hldef{(}\hlkwc{data}\hldef{=}\hlkwd{subset}\hldef{(null.dat, t}\hlopt{<=}\hldef{far.t.stat),}
+              \hlkwd{aes}\hldef{(}\hlkwc{x}\hldef{=t,} \hlkwc{ymin}\hldef{=}\hlnum{0}\hldef{,} \hlkwc{ymax}\hldef{=density.null),}
+              \hlkwc{fill}\hldef{=}\hlsng{"blue"}\hldef{,} \hlkwc{alpha}\hldef{=}\hlnum{0.5}\hldef{)} \hlopt{+}
+  \hlcom{#observation point (t statistic)}
+  \hlkwd{geom_point}\hldef{(}\hlkwc{data}\hldef{=far.obs,} \hlkwd{aes}\hldef{(}\hlkwc{x}\hldef{=t,} \hlkwc{y}\hldef{=y),} \hlkwc{color}\hldef{=}\hlsng{"red"}\hldef{)}\hlopt{+}
+  \hlcom{#Resampling Distribution}
+  \hlkwd{stat_density}\hldef{(}\hlkwc{data}\hldef{=resamples,}
+               \hlkwd{aes}\hldef{(}\hlkwc{x}\hldef{=far),}
+               \hlkwc{geom}\hldef{=}\hlsng{"line"}\hldef{,} \hlkwc{color}\hldef{=}\hlsng{"grey"}\hldef{)}\hlopt{+}
+  \hlcom{#clean up aesthetics}
+  \hlkwd{theme_bw}\hldef{()}\hlopt{+}
+  \hlkwd{ylab}\hldef{(}\hlsng{"Density"}\hldef{)}\hlopt{+}
+  \hlkwd{ggtitle}\hldef{(}\hlsng{"T-Test for Far Responses of the Young Zebra Finches"}\hldef{,}
+          \hlkwc{subtitle}\hldef{=}\hlkwd{bquote}\hldef{(H[}\hlnum{0}\hldef{]}\hlopt{==}\hlnum{0}\hlopt{*}\hlsng{";"}\hlopt{~}\hldef{H[a]}\hlopt{>=}\hlnum{0}\hldef{))}
+\hldef{far.plot}
+\end{alltt}
+\end{kframe}
+\includegraphics[width=\maxwidth]{figure/unnamed-chunk-9-1} 
+\end{knitrout}
   \item Question 4, part(c).
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hldef{diff.t.stat} \hlkwb{=} \hldef{(}\hlkwd{mean}\hldef{(diff.vec)} \hlopt{-} \hldef{mu0)}\hlopt{/}\hldef{(}\hlkwd{sd}\hldef{(diff.vec)}\hlopt{/}\hlkwd{sqrt}\hldef{(n))} \hlcom{#difference t statistic}
+\hlcom{#data for plotting observed point}
+\hldef{diff.obs} \hlkwb{=} \hlkwd{tibble}\hldef{(}\hlkwc{t} \hldef{= diff.t.stat,}
+                 \hlkwc{y} \hldef{=} \hlnum{0}\hldef{)}
+\hlcom{#plot for far values}
+\hldef{diff.plot} \hlkwb{=} \hlkwd{ggplot}\hldef{()} \hlopt{+}
+  \hlcom{# null distribution}
+  \hlkwd{geom_line}\hldef{(}\hlkwc{data}\hldef{=null.dat,}
+            \hlkwd{aes}\hldef{(}\hlkwc{x}\hldef{=t,} \hlkwc{y}\hldef{=density.null))}\hlopt{+}
+  \hlkwd{geom_hline}\hldef{(}\hlkwc{yintercept}\hldef{=}\hlnum{0}\hldef{)}\hlopt{+}
+  \hlcom{# rejection regions}
+  \hlkwd{geom_ribbon}\hldef{(}\hlkwc{data}\hldef{=}\hlkwd{subset}\hldef{(null.dat, t}\hlopt{<=}\hlkwd{qt}\hldef{(}\hlnum{0.025}\hldef{,} \hlkwc{df}\hldef{=n}\hlopt{-}\hlnum{1}\hldef{)),}
+              \hlkwd{aes}\hldef{(}\hlkwc{x}\hldef{=t,} \hlkwc{ymin}\hldef{=}\hlnum{0}\hldef{,} \hlkwc{ymax}\hldef{=density.null),}
+              \hlkwc{fill}\hldef{=}\hlsng{"red"}\hldef{,} \hlkwc{alpha}\hldef{=}\hlnum{0.5}\hldef{)} \hlopt{+}
+  \hlkwd{geom_ribbon}\hldef{(}\hlkwc{data}\hldef{=}\hlkwd{subset}\hldef{(null.dat, t}\hlopt{>=}\hlkwd{qt}\hldef{(}\hlnum{0.975}\hldef{,} \hlkwc{df}\hldef{=n}\hlopt{-}\hlnum{1}\hldef{)),}
+              \hlkwd{aes}\hldef{(}\hlkwc{x}\hldef{=t,} \hlkwc{ymin}\hldef{=}\hlnum{0}\hldef{,} \hlkwc{ymax}\hldef{=density.null),}
+              \hlkwc{fill}\hldef{=}\hlsng{"red"}\hldef{,} \hlkwc{alpha}\hldef{=}\hlnum{0.5}\hldef{)} \hlopt{+}
+  \hlcom{#p-value region}
+  \hlkwd{geom_ribbon}\hldef{(}\hlkwc{data}\hldef{=}\hlkwd{subset}\hldef{(null.dat, t}\hlopt{>=}\hldef{diff.t.stat),}
+              \hlkwd{aes}\hldef{(}\hlkwc{x}\hldef{=t,} \hlkwc{ymin}\hldef{=}\hlnum{0}\hldef{,} \hlkwc{ymax}\hldef{=density.null),}
+              \hlkwc{fill}\hldef{=}\hlsng{"blue"}\hldef{,} \hlkwc{alpha}\hldef{=}\hlnum{0.5}\hldef{)} \hlopt{+}
+  \hlkwd{geom_ribbon}\hldef{(}\hlkwc{data}\hldef{=}\hlkwd{subset}\hldef{(null.dat, t}\hlopt{<=-}\hldef{diff.t.stat),}
+              \hlkwd{aes}\hldef{(}\hlkwc{x}\hldef{=t,} \hlkwc{ymin}\hldef{=}\hlnum{0}\hldef{,} \hlkwc{ymax}\hldef{=density.null),}
+              \hlkwc{fill}\hldef{=}\hlsng{"blue"}\hldef{,} \hlkwc{alpha}\hldef{=}\hlnum{0.5}\hldef{)} \hlopt{+}
+  \hlcom{#observation point (t statistic)}
+  \hlkwd{geom_point}\hldef{(}\hlkwc{data}\hldef{=diff.obs,} \hlkwd{aes}\hldef{(}\hlkwc{x}\hldef{=t,} \hlkwc{y}\hldef{=y),} \hlkwc{color}\hldef{=}\hlsng{"red"}\hldef{)}\hlopt{+}
+  \hlcom{#Resampling Distribution}
+  \hlkwd{stat_density}\hldef{(}\hlkwc{data}\hldef{=resamples,}
+               \hlkwd{aes}\hldef{(}\hlkwc{x}\hldef{=difference),}
+               \hlkwc{geom}\hldef{=}\hlsng{"line"}\hldef{,} \hlkwc{color}\hldef{=}\hlsng{"grey"}\hldef{)}\hlopt{+}
+  \hlcom{#clean up aesthetics}
+  \hlkwd{theme_bw}\hldef{()}\hlopt{+}
+  \hlkwd{ylab}\hldef{(}\hlsng{"Density"}\hldef{)}\hlopt{+}
+  \hlkwd{ggtitle}\hldef{(}\hlsng{"T-Test for Difference in Close and Far Responses for Young Zebra Finches"}\hldef{,}
+          \hlkwc{subtitle}\hldef{=}\hlkwd{bquote}\hldef{(H[}\hlnum{0}\hldef{]}\hlopt{==}\hlnum{0}\hlopt{*}\hlsng{";"}\hlopt{~}\hldef{H[a]}\hlopt{>=}\hlnum{0}\hldef{))}
+\hldef{diff.plot}
+\end{alltt}
+\end{kframe}
+\includegraphics[width=\maxwidth]{figure/unnamed-chunk-10-1} 
+\end{knitrout}
 \end{enumerate}
 \end{enumerate}
 

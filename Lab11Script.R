@@ -94,53 +94,137 @@ g = hedges_g(x = dopamine.data$`difference`, mu = 0, alternative = "two.sided")
 
 
 #Task 5: Plotting
+R = 1000 #number of resamples
+mu0 = 0 #hypothesized mean
+close.vec = dopamine.data$Closer_vals #vector for closer values
+far.vec = dopamine.data$Farther_vals #vector for farther values
+diff.vec = dopamine.data$difference #vector for difference
+n = length(close.vec) #sample size
+resamples = tibble(close = numeric(R),
+                   far = numeric(R),
+                   difference = numeric(R))
+for(i in 1:R){
+  #resampling close responses
+  close.sample <- sample(x=close.vec,
+                        size=n,
+                        replace=T)
+  #resampling far responses
+  far.sample <- sample(x=far.vec,
+                         size=n,
+                         replace=T)
+  #resampling difference
+  difference.sample <- sample(x=diff.vec,
+                         size=n,
+                         replace=T)
+  resamples$close[i] = (mean(close.sample)-mu0)/(sd(close.sample)/sqrt(n)) #resampled t statistic for close values
+  resamples$far[i] = (mean(far.sample)-mu0)/(sd(far.sample)/sqrt(n)) #resampled t statistic for far values
+  resamples$difference[i] = (mean(difference.sample)-mu0)/(sd(difference.sample)/sqrt(n)) #resampled t statistic for differences
+}
+
+#data for null T disribution
+null.dat = tibble(t=seq(-5, 5, length.out = 1000)) |>
+  mutate(density.null = dt(t, df=24))
 
 #Part a
-null.dat1 = tibble(t=seq(-5, 5, length.out = 1000)) |>
-  mutate(density.null = dt(t, df=24))
-null.plot = ggplot() +
+
+close.t.stat = (mean(close.vec) - mu0)/(sd(close.vec)/sqrt(n)) #close t statistic
+#data for plotting observed point
+close.obs = tibble(t = close.t.stat,
+             y = 0)
+#plot for close values
+close.plot = ggplot() +
   # null distribution
-  geom_line(data=null.dat1, 
+  geom_line(data=null.dat, 
             aes(x=t, y=density.null))+
   geom_hline(yintercept=0)+
-  # rejection regions
-  geom_ribbon(data=subset(null.dat1, t<=qt(0.025, df=24)), 
+  # rejection region
+  geom_ribbon(data=subset(null.dat, t>=qt(0.95, df=n-1)), 
               aes(x=t, ymin=0, ymax=density.null),
-              fill="red", alpha=0.5)+
-  geom_ribbon(data=subset(null.dat1, t>=qt(0.975, df=24)), 
+              fill="red", alpha=0.5) +
+  #p-value region
+  geom_ribbon(data=subset(null.dat, t>=close.t.stat), 
               aes(x=t, ymin=0, ymax=density.null),
-              fill="red", alpha=0.5)
+              fill="blue", alpha=0.5) +
+  #observation point (t statistic)
+  geom_point(data=close.obs, aes(x=t, y=y), color="red")+
+  #Resampling Distribution
+  stat_density(data=resamples, 
+               aes(x=close),
+               geom="line", color="grey")+
+  #clean up aesthetics
+  theme_bw()+
+  ylab("Density")+
+  ggtitle("T-Test for Close Responses of the Young Zebra Finches",
+          subtitle=bquote(H[0]==0*";"~H[a]>=0))
 
 #Part b
-null.dat2 = tibble(t=seq(-5, 5, length.out = 1000)) |>
-  mutate(density.null = dt(t, df=24))
-null.plot = ggplot() +
+
+far.t.stat = (mean(far.vec) - mu0)/(sd(far.vec)/sqrt(n)) #far t statistic
+#data for plotting observed point
+far.obs = tibble(t = far.t.stat,
+                   y = 0)
+#plot for far values
+far.plot = ggplot() +
   # null distribution
-  geom_line(data=null.dat2, 
+  geom_line(data=null.dat, 
             aes(x=t, y=density.null))+
   geom_hline(yintercept=0)+
-  # rejection regions
-  geom_ribbon(data=subset(null.dat2, t<=qt(0.025, df=24)), 
+  # rejection region
+  geom_ribbon(data=subset(null.dat, t<=qt(0.05, df=n-1)), 
               aes(x=t, ymin=0, ymax=density.null),
-              fill="red", alpha=0.5)+
-  geom_ribbon(data=subset(null.dat2, t>=qt(0.975, df=24)), 
+              fill="red", alpha=0.5) +
+  #p-value region
+  geom_ribbon(data=subset(null.dat, t<=far.t.stat), 
               aes(x=t, ymin=0, ymax=density.null),
-              fill="red", alpha=0.5)
+              fill="blue", alpha=0.5) +
+  #observation point (t statistic)
+  geom_point(data=far.obs, aes(x=t, y=y), color="red")+
+  #Resampling Distribution
+  stat_density(data=resamples, 
+               aes(x=far),
+               geom="line", color="grey")+
+  #clean up aesthetics
+  theme_bw()+
+  ylab("Density")+
+  ggtitle("T-Test for Far Responses of the Young Zebra Finches",
+          subtitle=bquote(H[0]==0*";"~H[a]>=0))
 
 #Part c
-null.dat3 = tibble(t=seq(-5, 5, length.out = 1000)) |>
-  mutate(density.null = dt(t, df=24))
-null.plot = ggplot() +
+
+diff.t.stat = (mean(diff.vec) - mu0)/(sd(diff.vec)/sqrt(n)) #difference t statistic
+#data for plotting observed point
+diff.obs = tibble(t = diff.t.stat,
+                 y = 0)
+#plot for far values
+diff.plot = ggplot() +
   # null distribution
-  geom_line(data=null.dat3, 
+  geom_line(data=null.dat, 
             aes(x=t, y=density.null))+
   geom_hline(yintercept=0)+
   # rejection regions
-  geom_ribbon(data=subset(null.dat3, t<=qt(0.025, df=24)), 
+  geom_ribbon(data=subset(null.dat, t<=qt(0.025, df=n-1)), 
               aes(x=t, ymin=0, ymax=density.null),
-              fill="red", alpha=0.5)+
-  geom_ribbon(data=subset(null.dat3, t>=qt(0.975, df=24)), 
+              fill="red", alpha=0.5) +
+  geom_ribbon(data=subset(null.dat, t>=qt(0.975, df=n-1)), 
               aes(x=t, ymin=0, ymax=density.null),
-              fill="red", alpha=0.5)
+              fill="red", alpha=0.5) +
+  #p-value region
+  geom_ribbon(data=subset(null.dat, t>=diff.t.stat), 
+              aes(x=t, ymin=0, ymax=density.null),
+              fill="blue", alpha=0.5) +
+  geom_ribbon(data=subset(null.dat, t<=-diff.t.stat), 
+              aes(x=t, ymin=0, ymax=density.null),
+              fill="blue", alpha=0.5) +
+  #observation point (t statistic)
+  geom_point(data=diff.obs, aes(x=t, y=y), color="red")+
+  #Resampling Distribution
+  stat_density(data=resamples, 
+               aes(x=difference),
+               geom="line", color="grey")+
+  #clean up aesthetics
+  theme_bw()+
+  ylab("Density")+
+  ggtitle("T-Test for Difference in Close and Far Responses for Young Zebra Finches",
+          subtitle=bquote(H[0]==0*";"~H[a]>=0))
 
 
