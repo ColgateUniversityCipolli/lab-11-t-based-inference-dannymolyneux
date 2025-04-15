@@ -349,6 +349,7 @@ diff.plot = ggplot() +
           subtitle=bquote(H[0]==0*";"~H[a]>=0))
 diff.plot
 @
+As you can see by the red dots on each of these plots, the test statistic is significantly out of range of the null distribution. Given that, along with having very small p-values for each of the hypothesis tests, we can say there is statistically discernible support for the alternative hypotheses.
 \end{enumerate}
 \end{enumerate}
 
